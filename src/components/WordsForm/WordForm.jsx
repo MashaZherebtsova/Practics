@@ -13,12 +13,12 @@ export const WordForm = ({ addWord }) => {
     e.preventDefault();
     const word = { id: nanoid(), uaWord, enWord };
     addWord(word);
+    
   };
 
   const onInputChange = e => {
     const { value, name } = e.target;
-    console.log(name);
-    switch (name) {
+       switch (name) {
       case 'uaWord':
         setUaWord(value);
         break;

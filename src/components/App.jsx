@@ -1,50 +1,98 @@
-import { useEffect, useState } from 'react';
-import Header from './Header/Header';
-import { WordForm } from './WordsForm/WordForm';
-import { WordList } from './WordList/WordList';
-import { Filter } from './Filter/Filter';
+import { useState } from 'react';
+import { Routes, Route } from 'react-router';
+import { useLocalStorage } from 'hooks/useLocalStorage';
+import { SharedLayout } from './SharedLayout/SharedLayout';
+import { Home } from 'pages/Home';
+import { Quiz } from 'pages/Quiz';
 
 export const App = () => {
-  const [words, setWords] = useState(JSON.parse(localStorage.getItem('words')) ?? '');
+  const [words, setWords] = useLocalStorage('words', []);
   const [filter, setFilter] = useState('');
 
   const addWord = word => {
-    setWords(prevState => {
-      return [...prevState, word];
-    });
+    setWords(prevState => [...prevState, word]);
   };
-  const handleDeleteWord = id => {
-    setWords(prevState => {
-      return prevState.filter(word => word.id !== id);
-    });
+  const deleteWord = e => {
+    const { id } = e.target;
+    setWords(prevState => prevState.filter(word => word.id !== id));
   };
-  const handleChangeFilter = e => {
-    setFilter(e.target.value);
+
+  const onFilterChange = e => {
+    const { value } = e.target;
+    setFilter(value);
   };
-    
-  const handleFilterWords = () => { 
-    return words.filter(word => 
-      word.enWord.toLowerCase().includes(filter.toLowerCase()) || word.uaWord.toLowerCase().includes(filter.toLowerCase())
-     
-    )
-  }
-  
-  useEffect(()=> {
-    console.log('words useEffect ')
-    localStorage.setItem('words', JSON.stringify(words));
-  }, [words])
- 
+
+  const editWord = word => {
+    setWords(prevWords =>
+      prevWords.map(item => {
+        if (item.id === word.id) {
+          return word;
+        }
+        return item;
+      })
+    );
+  };
+
+  const toggleChecked = id => {
+    setWords(prevState =>
+      prevState.map(word => {
+        if (word.id === id) {
+          return { ...word, checked: !word.checked };
+        }
+        return word;
+      })
+    );
+  };
+
+  const checkAllWords = status => {
+    if (status === 'check') {
+      setWords(prev =>
+        prev.map(item => ({
+          ...item,
+          checked: true,
+        }))
+      );
+      return;
+    }
+    setWords(prev =>
+      prev.map(item => ({
+        ...item,
+        checked: false,
+      }))
+    );
+  };
+
   return (
     <div>
-      <Header />
-      <WordForm addWord={addWord} />
-      <Filter value={filter} handleChange={handleChangeFilter} />
-      <WordList
-        words={handleFilterWords()}
-        deleteWord={handleDeleteWord}
-        
-       
-      />
+      <Routes>
+        <Route path="/" element={<SharedLayout />}>
+          <Route
+            index
+            element={
+              <Home
+                words={words}
+                filter={filter}
+                addWord={addWord}
+                deleteWord={deleteWord}
+                onFilterChange={onFilterChange}
+                toggleChecked={toggleChecked}
+                editWord={editWord}
+                checkAllWords={checkAllWords}
+              />
+            }
+          />
+          <Route
+            path="/quiz"
+            element={
+              <Quiz
+                toggleChecked={toggleChecked}
+                words={words}
+                quizWords={words.filter(word => word.checked)}
+              />
+            }
+          />
+        </Route>
+      </Routes>
     </div>
   );
 };

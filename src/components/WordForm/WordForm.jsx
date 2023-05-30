@@ -1,30 +1,42 @@
-import React from 'react';
 import { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-//import { Margin } from '@mui/icons-material';
 import { nanoid } from 'nanoid';
 
-export const WordForm = ({ addWord }) => {
+export default function WordForm({ addWord }) {
   const [uaWord, setUaWord] = useState('');
   const [enWord, setEnWord] = useState('');
 
+  const reset = () => {
+    setUaWord('');
+    setEnWord('');
+  };
+
   const onSubmit = e => {
     e.preventDefault();
-    const word = { id: nanoid(), uaWord, enWord };
+    const word = {
+      id: nanoid(),
+      uaWord,
+      enWord,
+      checked: false,
+    };
+    console.log(word);
     addWord(word);
-    
+    reset();
   };
 
   const onInputChange = e => {
-    const { value, name } = e.target;
-       switch (name) {
+    const { name, value } = e.target;
+
+    switch (name) {
       case 'uaWord':
         setUaWord(value);
         break;
+
       case 'enWord':
         setEnWord(value);
         break;
+
       default:
         return;
     }
@@ -32,28 +44,32 @@ export const WordForm = ({ addWord }) => {
 
   return (
     <form
-      onSubmit={onSubmit}
       style={{
+        display: 'flex',
+        flexDirection: 'column',
         marginLeft: 'auto',
         marginRight: 'auto',
-        display: 'flex',
-        maxWidth: '400px',
-        flexDirection: 'column',
+        width: '400px',
       }}
+      onSubmit={onSubmit}
     >
       <TextField
-        onInput={onInputChange}
+        onChange={onInputChange}
         name="uaWord"
         label="Ukrainian word"
         variant="standard"
+        value={uaWord}
       />
       <TextField
-        onInput={onInputChange}
+        onChange={onInputChange}
         name="enWord"
         label="English word"
         variant="standard"
+        value={enWord}
       />
-      <Button type="submit" variant="contained">Add word</Button>
+      <Button type="submit" variant="contained">
+        Add word
+      </Button>
     </form>
   );
-};
+}
